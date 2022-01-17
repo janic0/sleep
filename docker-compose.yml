@@ -1,0 +1,17 @@
+services:
+  sleep:
+    expose:
+      - 8116
+    depends_on:
+      - db
+    build: .
+    ports:
+      - "8116:80"
+  db:
+    image: mongo
+    volumes:
+      - ./sdb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+  
