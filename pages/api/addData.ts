@@ -22,26 +22,50 @@ export default function handler(
     apiKey: req.body.token
   }).then((usr) => {
     if (usr) {
-      datapoint.find({ user: usr._id }).then((data) => {
-        let updated = false;
-        for (let d of data) {
-          if (d.added.getFullYear() === now.getFullYear() && d.added.getMonth() === now.getMonth() && d.added.getDate() === now.getDate()) {
-            d.value = req.body.value;
-            d.added = new Date();
-            d.save();
-            updated = true;
-            break;
+      if (!req.body.timestamp) {
+        datapoint.find({ user: usr._id }).then((data) => {
+          let updated = false;
+          for (let d of data) {
+            if (d.added.getFullYear() === now.getFullYear() && d.added.getMonth() === now.getMonth() && d.added.getDate() === now.getDate()) {
+              d.value = req.body.value;
+              d.added = new Date();
+              d.save();
+              updated = true;
+              break;
+            }
           }
-        }
-        if (updated) return res.status(200).json({ ok: true, result: "updated" });
+          if (updated) return res.status(200).json({ ok: true, result: "updated" });
+          datapoint.create({
+            added: new Date(),
+            value: req.body.value,
+            user: usr._id
+          }).then(() => {
+            res.status(200).json({ ok: true, result: "created" });
+          });
+        });
+      } else {
+        const tryDate = new Date(req.body.timestamp);
+        if (isNaN(tryDate.getTime())) return res.status(400).json({ ok: false, error: 'invalid timestamp' });
+        datapoint.find({ user: usr._id }).then((data) => {
+          let updated = false;
+          for (let d of data) {
+            if (d.added.getFullYear() === tryDate.getFullYear() && d.added.getMonth() === tryDate.getMonth() && d.added.getDate() === tryDate.getDate()) {
+              d.value = req.body.value;
+              d.added = new Date();
+              d.save();
+              updated = true;
+              break;
+            }
+          }
+        });
         datapoint.create({
-          added: new Date(),
+          added: tryDate,
           value: req.body.value,
           user: usr._id
         }).then(() => {
           res.status(200).json({ ok: true, result: "created" });
         });
-      });
+      }
     } else {
       res.status(401).json({
         ok: false,
