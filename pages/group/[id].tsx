@@ -48,7 +48,7 @@ const Group = (props: {
 	const [datasets, setDatasets] = useState<
 		{
 			label: string;
-			data: number[] | undefined[];
+			data: (number | undefined)[];
 			borderColor: string;
 		}[]
 	>([]);
@@ -59,7 +59,7 @@ const Group = (props: {
 		}[] = [];
 		const addedFormatted: string[] = [];
 		const datasets: {
-			data: number[] | undefined[];
+			data: (number | undefined)[];
 			label: string;
 			borderColor: string;
 		}[] = [];
@@ -78,7 +78,7 @@ const Group = (props: {
 		labels.sort((a, b) => a.timestamp - b.timestamp);
 		props.group.users.forEach((user) => {
 			const current: {
-				data: number[];
+				data: (number | undefined)[];
 				label: string;
 				borderColor: string;
 			} = { label: user.name + "'s sleep", data: [], borderColor: "red" };
