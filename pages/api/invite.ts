@@ -11,7 +11,7 @@ const invite = (req: NextApiRequest, res: NextApiResponse<{ ok: boolean, result?
             if (!req.body.id || typeof req.body.name !== "string") return res.status(400).json({ ok: false, error: 'no name' });
             group.findById(req.body.id).then((group) => {
                 if (group) {
-                    if (group.invites.length > 10) return res.status(400).json({ ok: false, error: "too many invites" });
+                    if (group.invited.length > 10) return res.status(400).json({ ok: false, error: "too many invites" });
                     user.findOne({ username: req.body.name }).then((suser) => {
                         if (suser) {
                             if (!group.invited.includes(suser._id) && !group.users.includes(suser._id)) {
