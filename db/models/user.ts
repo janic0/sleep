@@ -8,6 +8,7 @@ export interface userType {
     accessToken: string;
     apiKey: string;
     password: string;
+    color: string;
 }
 
 export default (models ? models["user"] : undefined) || model<userType>("user", new Schema<userType>({
@@ -18,5 +19,9 @@ export default (models ? models["user"] : undefined) || model<userType>("user", 
         type: String,
         default: ""
     },
-    accessToken: String
+    accessToken: String,
+    color: {
+        type: String,
+        default: "red"
+    }
 }));

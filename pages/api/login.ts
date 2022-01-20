@@ -11,6 +11,8 @@ type Data = {
   result?: string;
 }
 
+const colors = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'cyan', 'magenta', 'orange', 'purple']
+
 const generateSomeText = (): string => {
   let t = "";
   for (let i = 0; i < 10; i++) {
@@ -31,7 +33,7 @@ export default function handler(
   if (!req.body.username || typeof req.body.username !== "string") return res.status(400).json({ ok: false, error: 'no username' })
   if (!req.body.password || typeof req.body.password !== "string") return res.status(400).json({ ok: false, error: 'no password' })
   user.findOne({
-    username: req.body.username
+    username: req.body.username.toLowerCase()
   }).then((usr?: userType) => {
     if (usr) {
       compare(req.body.password, usr.password).then((valid) => {
@@ -46,12 +48,13 @@ export default function handler(
         }
       })
     } else {
-      if (!req.body.name || typeof req.body.name !== "string") return res.status(400).json({ ok: false, error: 'no name' })
+      if (!req.body.color || typeof req.body.color !== "string") return res.status(400).json({ ok: false, error: 'no color' })
+      if (!colors.includes(req.body.color)) return res.status(400).json({ ok: false, error: 'invalid color' })
       hash(req.body.password, 10).then((pw) => {
         user.create({
-          username: req.body.username,
+          username: req.body.username.toLowerCase(),
           password: pw,
-          name: req.body.name,
+          color: req.body.color,
           accessToken: generateAccessToken(),
           apiKey: generateAccessToken()
         }).then((user) => {

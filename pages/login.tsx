@@ -35,7 +35,7 @@ const Register: NextPage = () => {
 								body: JSON.stringify({
 									username: (e.target as any)[0].value,
 									password: (e.target as any)[1].value,
-									name: (e.target as any)[2].value,
+									color: (e.target as any)[2].value,
 								}),
 							}).then((r) => {
 								r.json().then((data) => {
@@ -64,12 +64,20 @@ const Register: NextPage = () => {
 							className="outline-none rounded p-4 w-full mt-4 dark:bg-slate-700 bg-slate-300"
 						/>
 						{register ? (
-							<input
-								name="name"
-								placeholder="Name"
-								type="text"
-								className="outline-none rounded p-4 w-full mt-4 dark:bg-slate-700 bg-slate-300"
-							/>
+							<select
+								name="color"
+								className="w-full outline-none mt-5 p-4 bg-slate-500 rounded"
+							>
+								<option value="red">red</option>
+								<option value="blue">blue</option>
+								<option value="green">green</option>
+								<option value="black">black</option>
+								<option value="white">white</option>
+								<option value="yellow">yellow</option>
+								<option value="magenta">magenta</option>
+								<option value="orange">orange</option>
+								<option value="purple">purple</option>
+							</select>
 						) : null}
 						<p className="text-red">{err}</p>
 						<input

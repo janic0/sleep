@@ -16,6 +16,7 @@ import {
 import { Line } from "react-chartjs-2";
 import datapoint from "../../db/models/datapoint";
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 ChartJS.register(
 	CategoryScale,
@@ -31,13 +32,19 @@ const Group = (props: {
 	group: {
 		id: string;
 		name: string;
-		invited: string[];
+		isOwner: boolean;
+		me: string;
+		invited: { id: string; name: string }[];
 		users: {
 			name: string;
+			color: string;
+			id: string;
 			datapoints: { timestamp: number; value: number }[];
 		}[];
 	};
 }) => {
+	const [invited, setInvited] = useState(props.group.invited);
+	const [members, setMembers] = useState(props.group.users);
 	const [newUsername, setNewUsername] = useState("");
 	const [labels, setLabels] = useState<
 		{
@@ -81,7 +88,7 @@ const Group = (props: {
 				data: (number | undefined)[];
 				label: string;
 				borderColor: string;
-			} = { label: user.name + "'s sleep", data: [], borderColor: "red" };
+			} = { label: user.name + "'s sleep", data: [], borderColor: user.color };
 			labels.forEach((label) => {
 				const value = user.datapoints.find(
 					(u) => new Date(u.timestamp).toLocaleDateString() === label.formatted
@@ -99,6 +106,9 @@ const Group = (props: {
 	}, [props.group.users]);
 	return (
 		<div className="dark:text-white flex justify-center mt-10">
+			<Head>
+				<title>OmegaSleep | {props.group.name}</title>
+			</Head>
 			<div className="w-full p-4 md:p-0 md:w-1/2">
 				<h1 className="text-2xl md:text-6xl font-bold text-center">
 					{props.group.name}
@@ -107,49 +117,106 @@ const Group = (props: {
 					{props.group.users.map((user, i) => (
 						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
 							🤦‍♀️ {"  " + user.name}
+							{props.group.isOwner && user.id !== props.group.me ? (
+								<button
+									onClick={() => {
+										fetch("/api/removeMember", {
+											method: "POST",
+											headers: {
+												"Content-Type": "application/json",
+											},
+											body: JSON.stringify({
+												id: props.group.id,
+												user: user.id,
+											}),
+										}).then((r) => {
+											r.json().then((data) => {
+												if (data.ok) {
+													setMembers(members.filter((m) => m.id !== user.id));
+													setInvited(invited.filter((m) => m.id !== user.id));
+												}
+											});
+										});
+									}}
+									className="ml-4  p-2 bg-red-500"
+								>
+									X
+								</button>
+							) : null}
 						</h1>
 					))}
 				</div>
 				<div className="flex flex-wrap justify-center gap-5 mt-4">
 					{props.group.invited.map((user, i) => (
 						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
-							🕣{"  " + user}
+							🕣{"  " + user.name}
+							{props.group.isOwner && user.id !== props.group.me ? (
+								<button
+									onClick={() => {
+										fetch("/api/removeMember", {
+											method: "POST",
+											headers: {
+												"Content-Type": "application/json",
+											},
+											body: JSON.stringify({
+												id: props.group.id,
+												user: user.id,
+											}),
+										}).then((r) => {
+											r.json().then((data) => {
+												if (data.ok) {
+													setMembers(members.filter((m) => m.id !== user.id));
+													setInvited(invited.filter((m) => m.id !== user.id));
+												}
+											});
+										});
+									}}
+									className="ml-4  p-2 bg-red-500"
+								>
+									X
+								</button>
+							) : null}
 						</h1>
 					))}
 				</div>
-				<div className="flex gap-4 mt-10">
-					<input
-						onChange={(e) => setNewUsername(e.target.value)}
-						value={newUsername}
-						type="text"
-						placeholder="add user"
-						className="w-full dark:bg-slate-800 bg-slate-200 p-4 outline-none"
-					/>
-					<button
-						onClick={() => {
-							fetch("/api/invite", {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({
-									id: props.group.id,
-									name: newUsername,
-								}),
-							}).then((r) => {
-								r.json().then((data) => {
-									if (data.ok) {
-										props.group.invited.push(newUsername);
-										setNewUsername("");
-									}
+				{props.group.isOwner ? (
+					<div className="flex gap-4 mt-10">
+						<input
+							onChange={(e) => setNewUsername(e.target.value)}
+							value={newUsername}
+							type="text"
+							placeholder="add user"
+							className="w-full dark:bg-slate-800 bg-slate-200 p-4 outline-none"
+						/>
+						<button
+							onClick={() => {
+								fetch("/api/invite", {
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify({
+										id: props.group.id,
+										name: newUsername,
+									}),
+								}).then((r) => {
+									r.json().then((data) => {
+										if (data.ok) {
+											setInvited([
+												...invited,
+												{ id: data.result, name: newUsername },
+											]);
+											setNewUsername("");
+										}
+									});
 								});
-							});
-						}}
-						className="p-4 bg-blue-500 hover:bg-blue-400"
-					>
-						add
-					</button>
-				</div>
+							}}
+							className="p-4 bg-blue-500 hover:bg-blue-400"
+						>
+							add
+						</button>
+					</div>
+				) : null}
 				<h1 className="text-2xl md:text-3xl text-center mt-10">Sleep Data</h1>
 				<div className="mt-10">
 					<Line
@@ -186,6 +253,8 @@ export const getServerSideProps: GetServerSideProps = (ctx) => {
 						if (g) {
 							const users: {
 								name: string;
+								color: string;
+								id: string;
 								datapoints: { timestamp: number; value: number }[];
 							}[] = [];
 							g.users.forEach((u: string) => {
@@ -193,17 +262,22 @@ export const getServerSideProps: GetServerSideProps = (ctx) => {
 									datapoint.find({ user: u }).then((data) => {
 										users.push({
 											name: uname.username,
+											color: uname.color,
+											id: uname._id.toString(),
 											datapoints: data.map((dp) => ({
 												timestamp: new Date(dp.added).getTime(),
 												value: dp.value,
 											})),
 										});
 										if (users.length === g.users.length) {
-											const invited: string[] = [];
+											const invited: { id: string; name: string }[] = [];
 											if (g.invited && g.invited.length > 0) {
 												g.invited.forEach((invite: string) => {
 													user.findById(invite).then((invitee) => {
-														invited.push(invitee.username);
+														invited.push({
+															id: invitee._id.toString(),
+															name: invitee.username,
+														});
 														if (invited.length === g.invited.length) {
 															return res({
 																props: {
@@ -212,6 +286,9 @@ export const getServerSideProps: GetServerSideProps = (ctx) => {
 																		name: g.name,
 																		users: users,
 																		invited: invited,
+																		me: usr._id.toString(),
+																		isOwner:
+																			g.owner.toString() === usr._id.toString(),
 																	},
 																},
 															});
@@ -226,6 +303,9 @@ export const getServerSideProps: GetServerSideProps = (ctx) => {
 															name: g.name,
 															users,
 															invited: [],
+															me: usr._id.toString(),
+															isOwner:
+																g.owner.toString() === usr._id.toString(),
 														},
 													},
 												});

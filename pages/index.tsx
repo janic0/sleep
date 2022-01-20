@@ -33,6 +33,7 @@ ChartJS.register(
 const Home = (props: {
 	apiToken: string;
 	data: { value: number; added: string }[];
+	color: string;
 	groups: { id: string; name: string }[];
 	invited: { id: string; name: string }[];
 }) => {
@@ -75,7 +76,7 @@ const Home = (props: {
 									{
 										data: props.data.map((d) => d.value / 3600),
 										label: "Sleep in hours",
-										borderColor: "cyan",
+										borderColor: props.color,
 									},
 								],
 							}}
@@ -173,6 +174,7 @@ export const getServerSideProps: GetServerSideProps = (ctx) => {
 						group.find({ invited: { $in: [usr._id] } }).then((invited) => {
 							res({
 								props: {
+									color: usr.color || "cyan",
 									apiToken: usr.apiKey,
 									data: data.map((d) => ({
 										id: d._id.toString(),

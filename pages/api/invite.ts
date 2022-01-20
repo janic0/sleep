@@ -11,23 +11,27 @@ const invite = (req: NextApiRequest, res: NextApiResponse<{ ok: boolean, result?
             if (!req.body.id || typeof req.body.name !== "string") return res.status(400).json({ ok: false, error: 'no name' });
             group.findById(req.body.id).then((group) => {
                 if (group) {
-                    if (group.invited.length > 10) return res.status(400).json({ ok: false, error: "too many invites" });
-                    user.findOne({ username: req.body.name }).then((suser) => {
-                        if (suser) {
-                            if (!group.invited.includes(suser._id) && !group.users.includes(suser._id)) {
-                                group.invited.push(suser._id);
-                                group.save();
-                                return res.status(200).json({
-                                    ok: true,
-                                    result: "invited"
-                                });
+                    if (group.owner === usr._id.toString()) {
+                        if (group.invited.length > 10) return res.status(400).json({ ok: false, error: "too many invites" });
+                        user.findOne({ username: req.body.name }).then((suser) => {
+                            if (suser) {
+                                if (!group.invited.includes(suser._id) && !group.users.includes(suser._id)) {
+                                    group.invited.push(suser._id);
+                                    group.save();
+                                    return res.status(200).json({
+                                        ok: true,
+                                        result: suser._id.toString()
+                                    });
+                                } else {
+                                    return res.status(400).json({ ok: false, error: 'already invited' });
+                                }
                             } else {
-                                return res.status(400).json({ ok: false, error: 'already invited' });
+                                return res.status(400).json({ ok: false, error: 'no user' });
                             }
-                        } else {
-                            return res.status(400).json({ ok: false, error: 'no user' });
-                        }
-                    })
+                        })
+                    } else {
+                        return res.status(400).json({ ok: false, error: 'not owner' });
+                    }
                 } else {
                     return res.status(404).json({
                         ok: false,
