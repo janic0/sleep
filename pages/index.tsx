@@ -60,11 +60,22 @@ const Home = (props: {
 								setCopied(true);
 								setTimeout(() => setCopied(false), 1000);
 							}}
-							className="bg-green-500 p-4"
+							className="bg-green-500 p-4 hover:bg-green-400"
 						>
 							{copied ? "Copied" : "Copy"}
 						</button>
 					</div>
+					<a
+						href={
+							"https://www.icloud.com/shortcuts/7fa6c87f2a874333bed8209a5eddaa68"
+						}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<button className="w-full p-4 hover:bg-green-400 bg-green-500 mt-5">
+							Download Shortcut
+						</button>
+					</a>
 					<div className="mt-20">
 						<Line
 							data={{
@@ -132,7 +143,7 @@ const Home = (props: {
 							value={newGroup}
 							type="text"
 							placeholder="Group Name"
-							className="bg-blue-500 w-full p-4 hover:bg-blue-400 transition-colors outline-none"
+							className="bg-slate-500 w-full p-4 dark:hover:bg-blue-800 hover:bg-blue-200 transition-colors outline-none"
 						/>
 						<button
 							onClick={() => {
