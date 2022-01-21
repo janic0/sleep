@@ -67,7 +67,7 @@ const Home = (props: {
 					</div>
 					<a
 						href={
-							"https://www.icloud.com/shortcuts/8685096cd68843829c25a40eaa882daf"
+							"https://www.icloud.com/shortcuts/db8b7610607240eda3d31fdcb5a5db90"
 						}
 						target="_blank"
 						rel="noopener noreferrer"
