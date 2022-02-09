@@ -129,9 +129,11 @@ const Group = (props: {
 					{props.group.name}
 				</h1>
 				<div className="flex flex-wrap justify-center gap-5 mt-10">
-					{members.map((user, i) => (
+					{[...members, ...invited].map((user, i) => (
 						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
-							🤦‍♀️ {"  " + user.name}
+							{(members.find((m) => m.id === user.id) ? "🤦‍♀️" : "🕣") +
+								"  " +
+								user.name}
 							{props.group.isOwner && user.id !== props.group.me ? (
 								<button
 									onClick={() => {
@@ -155,39 +157,6 @@ const Group = (props: {
 										});
 									}}
 									className="ml-4 px-2 rounded bg-red-500"
-								>
-									X
-								</button>
-							) : null}
-						</h1>
-					))}
-				</div>
-				<div className="flex flex-wrap justify-center gap-5 mt-4">
-					{invited.map((user, i) => (
-						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
-							🕣{"  " + user.name}
-							{props.group.isOwner && user.id !== props.group.me ? (
-								<button
-									onClick={() => {
-										fetch("/api/removeMember", {
-											method: "POST",
-											headers: {
-												"Content-Type": "application/json",
-											},
-											body: JSON.stringify({
-												id: props.group.id,
-												user: user.id,
-											}),
-										}).then((r) => {
-											r.json().then((data) => {
-												if (data.ok) {
-													setMembers(members.filter((m) => m.id !== user.id));
-													setInvited(invited.filter((m) => m.id !== user.id));
-												}
-											});
-										});
-									}}
-									className="ml-4  p-2 bg-red-500"
 								>
 									X
 								</button>
