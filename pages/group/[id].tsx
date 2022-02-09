@@ -112,7 +112,7 @@ const Group = (props: {
 		});
 		setLabels(labels);
 		setAverage(averages);
-		setTotalAverage(average.reduce((acc, curr) => acc + curr.value, 0));
+		setTotalAverage(averages.reduce((acc, curr) => acc + curr.value, 0));
 		setDatasets(datasets);
 	}, [props.group.users]);
 	return (
