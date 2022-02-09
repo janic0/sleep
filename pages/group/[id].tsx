@@ -76,10 +76,14 @@ const Group = (props: {
 			borderColor: string;
 		}[] = [];
 		props.group.users.forEach((user) => {
-			const userAverage =
-				user.datapoints.reduce((acc, curr) => acc + curr.value, 0) /
-				user.datapoints.length;
-			averages.push({ name: user.name, value: userAverage, color: user.color });
+			averages.push({
+				name: user.name,
+				value: user.datapoints.length
+					? user.datapoints.reduce((acc, curr) => acc + curr.value, 0) /
+					  user.datapoints.length
+					: 0,
+				color: user.color,
+			});
 			user.datapoints.forEach((dp) => {
 				const formatted = new Date(dp.timestamp).toLocaleDateString();
 				if (!addedFormatted.includes(formatted)) {
