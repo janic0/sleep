@@ -235,13 +235,10 @@ const Group = (props: {
 				) : null}
 				{average.length ? (
 					<div className="flex w-full divide-x-2 mt-5">
-						{average.map((user) => {
-							console.log((100 / totalAverage) * user.value);
-						})}
 						{average.map((user, i) => (
 							<div
 								key={i}
-								className=" p-4"
+								className={user.value > 0 ? "p-4" : "hidden"}
 								style={{
 									width: (100 / totalAverage) * user.value + "%",
 									backgroundColor: user.color,
