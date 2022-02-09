@@ -45,6 +45,10 @@ const Group = (props: {
 }) => {
 	const [invited, setInvited] = useState(props.group.invited);
 	const [members, setMembers] = useState(props.group.users);
+	const [average, setAverage] = useState<
+		{ name: string; value: number; color: string }[]
+	>([]);
+	const [totalAverage, setTotalAverage] = useState(0);
 	const [newUsername, setNewUsername] = useState("");
 	const [labels, setLabels] = useState<
 		{
@@ -65,12 +69,17 @@ const Group = (props: {
 			formatted: string;
 		}[] = [];
 		const addedFormatted: string[] = [];
+		const averages: { name: string; value: number; color: string }[] = [];
 		const datasets: {
 			data: (number | undefined)[];
 			label: string;
 			borderColor: string;
 		}[] = [];
 		props.group.users.forEach((user) => {
+			const userAverage =
+				user.datapoints.reduce((acc, curr) => acc + curr.value, 0) /
+				user.datapoints.length;
+			averages.push({ name: user.name, value: userAverage, color: user.color });
 			user.datapoints.forEach((dp) => {
 				const formatted = new Date(dp.timestamp).toLocaleDateString();
 				if (!addedFormatted.includes(formatted)) {
@@ -102,6 +111,8 @@ const Group = (props: {
 			datasets.push(current);
 		});
 		setLabels(labels);
+		setAverage(averages);
+		setTotalAverage(average.reduce((acc, curr) => acc + curr.value, 0));
 		setDatasets(datasets);
 	}, [props.group.users]);
 	return (
@@ -120,6 +131,7 @@ const Group = (props: {
 							{props.group.isOwner && user.id !== props.group.me ? (
 								<button
 									onClick={() => {
+										if (!confirm("remove " + user.name + "?")) return;
 										fetch("/api/removeMember", {
 											method: "POST",
 											headers: {
@@ -138,7 +150,7 @@ const Group = (props: {
 											});
 										});
 									}}
-									className="ml-4  p-2 bg-red-500"
+									className="ml-4 px-2 rounded bg-red-500"
 								>
 									X
 								</button>
@@ -215,6 +227,25 @@ const Group = (props: {
 						>
 							add
 						</button>
+					</div>
+				) : null}
+				{average.length ? (
+					<div className="flex w-full divide-x-2 mt-5">
+						{average.map((user) => {
+							console.log((100 / totalAverage) * user.value);
+						})}
+						{average.map((user, i) => (
+							<div
+								key={i}
+								className=" p-4"
+								style={{
+									width: (100 / totalAverage) * user.value + "%",
+									backgroundColor: user.color,
+								}}
+							>
+								{user.name}
+							</div>
+						))}
 					</div>
 				) : null}
 				<h1 className="text-2xl md:text-3xl text-center mt-10">Sleep Data</h1>
