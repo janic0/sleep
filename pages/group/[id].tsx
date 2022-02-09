@@ -129,7 +129,7 @@ const Group = (props: {
 					{props.group.name}
 				</h1>
 				<div className="flex flex-wrap justify-center gap-5 mt-10">
-					{props.group.users.map((user, i) => (
+					{members.map((user, i) => (
 						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
 							🤦‍♀️ {"  " + user.name}
 							{props.group.isOwner && user.id !== props.group.me ? (
@@ -163,7 +163,7 @@ const Group = (props: {
 					))}
 				</div>
 				<div className="flex flex-wrap justify-center gap-5 mt-4">
-					{props.group.invited.map((user, i) => (
+					{invited.map((user, i) => (
 						<h1 className="bg-slate-500 p-4 whitespace-pre" key={i}>
 							🕣{"  " + user.name}
 							{props.group.isOwner && user.id !== props.group.me ? (
